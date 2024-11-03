@@ -1,0 +1,11 @@
+MEM_SERVER_SSH_IP=128.110.218.205
+MEM_SERVER_SSH_USER=patelris
+
+function ssh_execute {
+    ssh $MEM_SERVER_SSH_USER@$MEM_SERVER_SSH_IP -o "IdentitiesOnly=yes" -i ~/.ssh/id_ed25519 $1
+}
+
+function ssh_execute_tty {
+    echo $MEM_SERVER_SSH_USER@$MEM_SERVER_SSH_IP -t $1 >> local/ssh_execute_tty.txt
+    ssh $MEM_SERVER_SSH_USER@$MEM_SERVER_SSH_IP -o "IdentitiesOnly=yes" -i ~/.ssh/id_ed25519 -t $1
+}
