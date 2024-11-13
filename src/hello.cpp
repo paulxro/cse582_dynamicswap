@@ -9,15 +9,15 @@ int register_object(far_memory::GenericUniquePtr * const ptr) {
     object_addrs_mut.lock();
     object_addrs.push_back(ptr);
 
-    FILE* f = fopen("output", "w");
-    setbuf(f, NULL);
+    // FILE* f = fopen("output", "w");
+    // setbuf(f, NULL);
 
-    for (size_t i = 0; i < object_addrs.size(); i++) {
-        fprintf(f, "%p\n", object_addrs[i]);
-    }
+    // for (size_t i = 0; i < object_addrs.size(); i++) {
+    //     fprintf(f, "%p\n", object_addrs[i]);
+    // }
 
 
-    fclose(f);
+    // fclose(f);
 
     object_addrs_mut.unlock();
 

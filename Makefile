@@ -43,3 +43,6 @@ $(TEST_OBJ)/%.o: $(TEST_SRC)/%.cpp
 
 test_tcp_01: $(TEST_OBJ)/test_tcp_01.o
 	$(CXX) -o $(AIFM_PATH)/bin/$@ $(TEST_OBJ)/$@.o $(lib_obj) $(OBJ_FILES) $(librt_libs) $(RUNTIME_LIBS) $(LDFLAGS) -L$(SHENANGO_PATH)/rdma-core/build/lib/statics/ -lmlx5 -libverbs -lnl-3 -lnl-route-3 -T $(SHENANGO_PATH)/base/base.ld -lnuma
+
+test_tcp_02: $(TEST_OBJ)/test_tcp_02.o
+	$(CXX) -o $(AIFM_PATH)/bin/$@ $(TEST_OBJ)/$@.o $(lib_obj) $(OBJ_FILES) $(librt_libs) $(RUNTIME_LIBS) $(LDFLAGS) -L$(SHENANGO_PATH)/rdma-core/build/lib/statics/ -lmlx5 -libverbs -lnl-3 -lnl-route-3 -T $(SHENANGO_PATH)/base/base.ld -lnuma

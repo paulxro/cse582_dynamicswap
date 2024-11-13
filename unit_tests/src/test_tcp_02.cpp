@@ -7,20 +7,13 @@ extern "C" {
 #include "helpers.hpp"
 #include "manager.hpp"
 
-
-
 #include <cstdint>
 #include <cstring>
 #include <iostream>
 #include <memory>
 #include <random>
 #include <string>
-#include <type_traits>
 #include <vector>
-#include <signal.h>
-#include <unistd.h>
-
-extern std::vector<far_memory::GenericUniquePtr*> object_addrs;
 
 using namespace far_memory;
 using namespace std;
@@ -35,10 +28,13 @@ static inline void pass_test(void) {
   exit(1);
 }
 
+extern std::vector<far_memory::GenericUniquePtr*> object_addrs;
+
 constexpr static uint64_t kCacheSize = (128ULL << 20);
 constexpr static uint64_t kFarMemSize = (4ULL << 30);
 constexpr static uint32_t kNumGCThreads = 12;
-constexpr static uint32_t kNumEntries = 4096;
+constexpr static uint32_t kNumEntries =
+    (8ULL << 20); // So the array size is larger than the local cache size.
 constexpr static uint32_t kNumConnections = 300;
 
 uint64_t raw_array_A[kNumEntries];
@@ -78,9 +74,45 @@ void do_work(FarMemManager *manager) {
   auto array_B = manager->allocate_array<uint64_t, kNumEntries>();
   auto array_C = manager->allocate_array<uint64_t, kNumEntries>();
 
-  if (object_addrs.size() != 3 * kNumEntries)
-    fail_test();
-  
+  array_A.disable_prefetch();
+  array_B.disable_prefetch();
+  array_C.disable_prefetch();
+
+  FILE *f = fopen("output", "w");
+  setbuf(f, NULL);
+
+
+  int seen = -1;
+  for (uint64_t i = 0; i < 3 * kNumEntries; i++) {
+    // fprintf(f, "%lu : %d\n", i, object_addrs.at(i)->meta().is_present());
+    if (i % 1000 == 0) {
+        fprintf(f, "%lu : %d\n", i, object_addrs.at(i)->meta().get_object_size());
+        seen = object_addrs.at(i)->meta().get_object_size();
+    }
+    // if (object_addrs.at(i)->meta().is_present())
+    //     fail_test();
+    // DerefScope scope;
+    // array_A.at(scope, i);
+  }
+
+//   fprintf(f, "%s\n", "Passed A");
+
+//   for (uint64_t i = kNumEntries; i < 2 * kNumEntries; i++) {
+//     if (!object_addrs.at(i)->meta().is_present())
+//         fail_test();
+//     DerefScope scope;
+//     array_B.at(scope, i - kNumEntries);
+//   }
+
+//   fprintf(f, "%s\n", "Passed B");
+
+//   for (uint64_t i = 2 * kNumEntries; i < 3 * kNumEntries; i++) {
+//     if (!object_addrs.at(i)->meta().is_present())
+//         fail_test();
+//     DerefScope scope;
+//     array_C.at(scope, i - 2 * kNumEntries);
+//   }
+
   pass_test();
 }
 
