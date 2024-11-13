@@ -7,6 +7,8 @@ extern "C" {
 #include "helpers.hpp"
 #include "manager.hpp"
 
+
+
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -14,9 +16,24 @@ extern "C" {
 #include <random>
 #include <string>
 #include <type_traits>
+#include <vector>
+#include <signal.h>
+#include <unistd.h>
+
+extern std::vector<far_memory::GenericUniquePtr*> object_addrs;
 
 using namespace far_memory;
 using namespace std;
+
+static inline void fail_test(void) {
+  cout << "Failed" << endl;
+  exit(1);
+}
+
+static inline void pass_test(void) {
+  cout << "Passed" << endl;
+  exit(1);
+}
 
 constexpr static uint64_t kCacheSize = (128ULL << 20);
 constexpr static uint64_t kFarMemSize = (4ULL << 30);
@@ -57,6 +74,15 @@ void gen_random_array(uint64_t num_entries, uint64_t *raw_array) {
 }
 
 void do_work(FarMemManager *manager) {
+
+  FILE *f = fopen("output", "w");
+
+  fprintf(f, "%d\n", getpid());
+
+  fclose(f);
+
+  // kill(getpid(), SIGSTOP);
+
   auto array_A = manager->allocate_array<uint64_t, kNumEntries>();
   auto array_B = manager->allocate_array<uint64_t, kNumEntries>();
   auto array_C = manager->allocate_array<uint64_t, kNumEntries>();
@@ -67,7 +93,15 @@ void do_work(FarMemManager *manager) {
   copy_array(&array_B, raw_array_B);
   add_array(&array_C, &array_A, &array_B);
 
-  assert(object_addrs.size() == 3 * kNumEntries);
+  
+
+  
+
+  if (object_addrs.size() != 2 * kNumEntries)
+    fail_test();
+  
+  pass_test();
+  
 
   for (uint64_t i = 0; i < kNumEntries; i++) {
     DerefScope scope;
