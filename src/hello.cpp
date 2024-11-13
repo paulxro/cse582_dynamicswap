@@ -3,23 +3,17 @@
 #include "hello.hpp"
 
 std::mutex object_addrs_mut;
-std::vector<void*> object_addrs;
+std::vector<far_memory::GenericUniquePtr*> object_addrs;
 
-
-
-
-int register_object(void* addr) {
+int register_object(far_memory::GenericUniquePtr * const ptr) {
     object_addrs_mut.lock();
-    object_addrs.push_back(addr);
-
-    far_memory::GenericUniquePtr ptr;
-    
+    object_addrs.push_back(ptr);
 
     FILE* f = fopen("output", "w");
     setbuf(f, NULL);
 
     for (size_t i = 0; i < object_addrs.size(); i++) {
-        fprintf(f, "%p\n", (void*)object_addrs[i]);
+        fprintf(f, "%p\n", object_addrs[i]);
     }
 
 
