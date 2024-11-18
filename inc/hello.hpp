@@ -7,7 +7,13 @@
 #include <mutex>
 #include <optional>
 #include <vector>
+#include <thread>
+#include <atomic>
 #include "pointer.hpp"
 
-int register_object(void*);
+int register_object(far_memory::GenericUniquePtr*);
+
 int dynamic_scheduler();
+
+int init_dynamic_scheduler();
+int stop_dynamic_scheduler();

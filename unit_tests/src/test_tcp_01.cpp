@@ -7,8 +7,6 @@ extern "C" {
 #include "helpers.hpp"
 #include "manager.hpp"
 
-
-
 #include <cstdint>
 #include <cstring>
 #include <iostream>
