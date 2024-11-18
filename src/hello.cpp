@@ -4,9 +4,21 @@
 
 std::atomic<bool> dynamic_manager_running = true;
 std::mutex object_addrs_mut;
-std::vector<far_memory::GenericUniquePtr*> object_addrs;
+std::vector<far_memory::GenericArray*> object_addrs;
 
-int register_object(far_memory::GenericUniquePtr * const ptr) {
+
+/*
+    array = ...
+
+    DerefScope scope;
+
+    array.at(scope, 0);
+
+
+
+*/
+
+int register_object(far_memory::GenericArray* const ptr) {
     object_addrs_mut.lock();
     object_addrs.push_back(ptr);
     object_addrs_mut.unlock();
@@ -36,7 +48,18 @@ int dynamic_scheduler() {
     while (dynamic_manager_running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-        fprintf(f, "%d\n", i++);
+        object_addrs_mut.lock();
+        for (const auto& array_ptr : object_addrs) {
+            for (uint64_t i = 0; i < array_ptr->kNumItems_; i++) {
+                const auto& uptr = array_ptr->ptrs_[i];
+                if (!uptr.meta().is_present() && iptr.meta().is_hot()) {
+                    far_memory::DerefScope scope;
+                    (*((far_memory::Array<uint64_t, 4096>*)(array_ptr))).at(scope, i);
+                }
+            }
+
+        }
+        object_addrs_mut.unlock();
     }
 
     fprintf(f, "%s\n", "Stopping scheduler...");

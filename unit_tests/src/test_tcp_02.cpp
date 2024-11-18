@@ -15,6 +15,8 @@ extern "C" {
 #include <string>
 #include <vector>
 
+extern int register_object(far_memory::Array<uint64_t, 4096>* const);
+
 using namespace far_memory;
 using namespace std;
 
@@ -73,6 +75,8 @@ void do_work(FarMemManager *manager) {
   auto array_A = manager->allocate_array<uint64_t, kNumEntries>();
   auto array_B = manager->allocate_array<uint64_t, kNumEntries>();
   auto array_C = manager->allocate_array<uint64_t, kNumEntries>();
+
+  register_object
 
   array_A.disable_prefetch();
   array_B.disable_prefetch();

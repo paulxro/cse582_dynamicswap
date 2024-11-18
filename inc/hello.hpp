@@ -9,9 +9,11 @@
 #include <vector>
 #include <thread>
 #include <atomic>
+#include "deref_scope.hpp"
+#include "array.hpp"
 #include "pointer.hpp"
 
-int register_object(far_memory::GenericUniquePtr*);
+int register_object(far_memory::GenericArray*);
 
 int dynamic_scheduler();
 

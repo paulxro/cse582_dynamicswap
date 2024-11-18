@@ -76,7 +76,7 @@ void do_work(FarMemManager *manager) {
   auto array_B = manager->allocate_array<uint64_t, kNumEntries>();
   auto array_C = manager->allocate_array<uint64_t, kNumEntries>();
 
-  if (object_addrs.size() != 3 * kNumEntries)
+  if (object_addrs.size() != 3)
     fail_test();
   
   pass_test();
