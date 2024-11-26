@@ -13,7 +13,7 @@
 #include "array.hpp"
 #include "pointer.hpp"
 
-int register_object(far_memory::GenericArray*);
+int register_object(far_memory::GenericUniquePtr *);
 
 int dynamic_scheduler();
 

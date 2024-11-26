@@ -33,7 +33,7 @@ INC_DIR := $(CUR_DIR)/inc
 INC := -I$(SHENANGO_PATH)/bindings/cc -I$(SHENANGO_PATH)/ksched -I$(AIFM_PATH)/inc \
        -I$(AIFM_PATH)/DataFrame/AIFM/include/ -I$(SHENANGO_PATH)/inc
 
-all: test_tcp_01
+all: $(OBJ_FILES) test_tcp_01
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -I$(INC_DIR) $(INC) -fconcepts -fpermissive -c -o $@ $<

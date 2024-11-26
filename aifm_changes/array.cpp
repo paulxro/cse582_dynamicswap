@@ -16,11 +16,10 @@ GenericArray::GenericArray(FarMemManager *manager, uint32_t item_size,
   preempt_enable();
   for (uint64_t i = 0; i < num_items; i++) {
     ptrs_[i] = manager->allocate_generic_unique_ptr(kVanillaPtrDSID, item_size);
+    register_object(&ptrs_[i]);
   }
   kItemSize_ = item_size;
   kNumItems_ = num_items;
-
-  register_object(this);
 }
 
 GenericArray::~GenericArray() {}
