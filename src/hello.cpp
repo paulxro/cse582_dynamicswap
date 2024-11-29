@@ -2,7 +2,7 @@
 
 #include "hello.hpp"
 
-std::atomic<bool> dynamic_manager_running = true;
+std::atomic<bool> dynamic_manager_running;
 std::mutex object_addrs_mut;
 std::vector<far_memory::GenericUniquePtr *> object_addrs;
 
@@ -34,6 +34,8 @@ int register_object(far_memory::GenericUniquePtr * const ptr) {
 }
 
 int init_dynamic_scheduler() {
+    dynamic_manager_running.store(true);
+
     std::thread scheduler_thread(dynamic_scheduler);
 
     scheduler_thread.detach();
@@ -48,23 +50,22 @@ int dynamic_scheduler() {
 
     int i = 0;
 
-    fprintf(f, "%s\n", "Starting scheduler...");
+    fprintf(f, "Starting scheduler... (PID = %d)\n", getpid());
 
     while (dynamic_manager_running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        
+        // std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         object_addrs_mut.lock();
-        for (const auto& uptr : object_addrs) {
-            // for (uint64_t i = 0; i < array_ptr->kNumItems_; i++) {
-            //     const auto& uptr = array_ptr->ptrs_[i];
-            //     if (!uptr.meta().is_present() && uptr.meta().is_hot()) {
-            //         far_memory::DerefScope scope;
-            //         (*((far_memory::Array<uint64_t, 4096>*)(array_ptr))).at(scope, i);
-            //     }
-            // }
+        for (auto uptr : object_addrs) {
+            if (!uptr->meta().is_present()) {
+                fprintf(f, "%s\n", "Found non-present ptr object1...");
+                far_memory::DerefScope scope;
+                auto uptr_cast = reinterpret_cast<far_memory::UniquePtr<uint64_t> *>(uptr);
+                uptr_cast->template deref<true>(scope);
+                fprintf(f, "%s\n", "Brought it in...");
+            }
 
-            fprintf(f, "local ?= %d\n", uptr->meta().is_present());
+            // fprintf(f, "local ?= %d\n", uptr->meta().is_present());
 
         }
         

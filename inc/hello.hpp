@@ -9,6 +9,8 @@
 #include <vector>
 #include <thread>
 #include <atomic>
+#include <signal.h>
+#include <unistd.h>
 #include "deref_scope.hpp"
 #include "array.hpp"
 #include "pointer.hpp"
