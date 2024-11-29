@@ -17,6 +17,7 @@ extern "C" {
 #include <vector>
 #include <signal.h>
 #include <unistd.h>
+#include <thread>
 
 extern std::vector<far_memory::GenericUniquePtr*> object_addrs;
 
@@ -33,10 +34,10 @@ static inline void pass_test(void) {
   exit(1);
 }
 
-constexpr static uint64_t kCacheSize = (128ULL << 20);
+constexpr static uint64_t kCacheSize = 65536;
 constexpr static uint64_t kFarMemSize = (4ULL << 30);
 constexpr static uint32_t kNumGCThreads = 12;
-constexpr static uint32_t kNumEntries = 4096;
+constexpr static uint32_t kNumEntries = 128;
 constexpr static uint32_t kNumConnections = 300;
 
 uint64_t raw_array_A[kNumEntries];
@@ -75,6 +76,8 @@ void do_work(FarMemManager *manager) {
   auto array_A = manager->allocate_array<uint64_t, kNumEntries>();
   auto array_B = manager->allocate_array<uint64_t, kNumEntries>();
   auto array_C = manager->allocate_array<uint64_t, kNumEntries>();
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
   if (object_addrs.size() != 3 * kNumEntries)
     fail_test();

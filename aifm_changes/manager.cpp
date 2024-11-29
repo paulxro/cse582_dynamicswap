@@ -226,8 +226,15 @@ FarMemManagerFactory::build(uint64_t cache_size,
 
 FarMemManager::RegionManager::RegionManager(uint64_t size, bool is_local) {
   auto free_regions_count = ceil(size / static_cast<double>(Region::kSize));
+
+  FILE *f = fopen("internal_log", "a");
+
+  fprintf(f, "FREE_REGIONS_COUNT = %f, SIZE = %ld, K_SIZE = %ld\n", free_regions_count, size, Region::kSize);
+
+
   if (free_regions_count <= 2 * helpers::kNumSocket1CPUs) {
     LOG_PRINTF("%s\n", "Error: two few available regions.");
+    fprintf(f, "%s\n", "Error: two few available regions.");
     exit(-ENOSPC);
   }
   free_regions_ = std::move(CircularBuffer<Region, false>(free_regions_count));
@@ -253,6 +260,7 @@ FarMemManager::RegionManager::RegionManager(uint64_t size, bool is_local) {
   }
 
   for (uint64_t i = 0; i < free_regions_count; i++) {
+    fprintf(f, "%s\n", "Some bug.");
     BUG_ON(!free_regions_.push_back(new_region_fn(false)));
   }
 }

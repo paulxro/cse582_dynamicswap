@@ -52,9 +52,10 @@ int dynamic_scheduler() {
 
     while (dynamic_manager_running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        
 
         object_addrs_mut.lock();
-        for (const auto& array_ptr : object_addrs) {
+        for (const auto& uptr : object_addrs) {
             // for (uint64_t i = 0; i < array_ptr->kNumItems_; i++) {
             //     const auto& uptr = array_ptr->ptrs_[i];
             //     if (!uptr.meta().is_present() && uptr.meta().is_hot()) {
@@ -63,8 +64,12 @@ int dynamic_scheduler() {
             //     }
             // }
 
+            fprintf(f, "local ?= %d\n", uptr->meta().is_present());
+
         }
+        
         object_addrs_mut.unlock();
+        break;
     }
 
     fprintf(f, "%s\n", "Stopping scheduler...");
