@@ -15,7 +15,7 @@ Start an experiment with both nodes running the same image. The topology of the 
 ## Host
 
 1. ssh into the "Host" machine and navigate to the "/local" directory. AIFM should be present.
-2. Run `ifconfig` and copy the eno49 network card IP address.
+2. Run `ifconfig` and copy the eno49 network interface IP address.
 3. Modify "./AIFM/aifm/configs/server.config" (addr line) to reflect the ip from step (2).
 4. Modify "./AIFM/aifm/configs/server.config" (netmask line) to "255.255.248.0".
 5. Run `route -n` and copy the gateway for the 0.0.0.0 destination.
