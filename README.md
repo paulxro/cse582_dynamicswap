@@ -6,7 +6,7 @@ System-Aware Paging of Far Memory
 
 Ensure that you have **two (2)** cloudlab XL170 nodes.
 
-A profile named "server_host_AIFM" should be visible under the CSE582 cloudlab project profiles.
+A profile named "server_host_AIFM" should be visible under the CSE582 cloudlab project profiles. If this profile is not visible, you may utilize the profile given by the AIFM github repository, though driver setup will be required.
 
 Start an experiment with both nodes running the same image. The topology of the experiment should reflect two nodes connected through the same switch.
 
