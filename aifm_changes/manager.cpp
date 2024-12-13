@@ -12,7 +12,7 @@ extern "C" {
 
 #include "deref_scope.hpp"
 #include "manager.hpp"
-#include "hello.hpp"
+#include "dswap.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -68,7 +68,7 @@ FarMemManager::FarMemManager(uint64_t cache_size, uint64_t far_mem_size,
   }
   memset(evac_notifiers_, 0, sizeof(evac_notifiers_));
 
-  init_dynamic_scheduler();
+  init_dynamic_pager();
 
   for (uint8_t ds_id =
            std::numeric_limits<decltype(available_ds_ids_)::value_type>::min();
@@ -82,7 +82,7 @@ FarMemManager::FarMemManager(uint64_t cache_size, uint64_t far_mem_size,
 }
 
 FarMemManager::~FarMemManager() {
-  stop_dynamic_scheduler();
+  stop_dynamic_pager();
   while (ACCESS_ONCE(pending_gcs_)) {
     thread_yield();
   }

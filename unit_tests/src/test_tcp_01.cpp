@@ -94,6 +94,9 @@ void do_work(FarMemManager *manager) {
 
 int argc;
 void _main(void *arg) {
+
+  std::this_thread::sleep_for(std::chrono::seconds(10));
+
   char **argv = static_cast<char **>(arg);
   std::string ip_addr_port(argv[1]);
   auto raddr = helpers::str_to_netaddr(ip_addr_port);

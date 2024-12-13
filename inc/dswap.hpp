@@ -11,13 +11,15 @@
 #include <atomic>
 #include <signal.h>
 #include <unistd.h>
-#include "deref_scope.hpp"
+#include <cmath>
 #include "array.hpp"
-#include "pointer.hpp"
+#include "device.hpp"
+#include "helpers.hpp"
 
 int register_object(far_memory::GenericUniquePtr *);
 
-int dynamic_scheduler();
+int dynamic_pager();
+int dynamic_memory();
 
-int init_dynamic_scheduler();
-int stop_dynamic_scheduler();
+int init_dynamic_pager(uint64_t);
+int stop_dynamic_pager();
