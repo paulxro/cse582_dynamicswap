@@ -16,6 +16,22 @@
 #include "device.hpp"
 #include "helpers.hpp"
 
+namespace DSwap {
+    class ObjRef {
+        public:
+            uint64_t size;
+            far_memory::GenericUniquePtr* ptr;
+            ObjRef(far_memory::GenericUniquePtr* ptr, uint64_t size) {
+                this->size = size;
+                this->ptr  = ptr;
+            }
+
+            
+    };
+}
+
+
+
 int register_object(far_memory::GenericUniquePtr *);
 
 int dynamic_pager();

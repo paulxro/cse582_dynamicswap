@@ -1,116 +1,59 @@
 # DynamicSwap
 
-Dynamic Re-Paging of Remote Memory Based on System Load.
+System-Aware Paging of Far Memory
 
 # Hardware/OS Setup
 
-Ensure that you have **two (2)** nodes with the following properties:
+Ensure that you have **two (2)** cloudlab XL170 nodes.
 
-* (1+) Mellanox ConnectX-4+ NIC
-* 256GB+ of SATA SSD Storage
-* Ubuntu 20.04 (more recent versions show instability with Infiniswap)
+A profile named "server_host_AIFM" should be visible under the CSE582 cloudlab project profiles.
 
-*I found that the Xl170 node from CloudLab works well for this.*
+Start an experiment with both nodes running the same image. The topology of the experiment should reflect two nodes connected through the same switch.
 
 # Startup
 
-1. Ensure that you have an active reservation that meets the above hardware criteria.
-2. Navigate to Cloudlab and select "Start Experiment" from the top-left dropdown.
-3. Change the profile to "server-host-infiniswap" if you are using Xl170 nodes, or make a custom profile if not. If you do not see this profile, you can make your own under "My Profiles" -- see appendix A. Click next.
-4. Give the experiment a unique name. Ensure that your reservation is active under the right "project." Click next.
-5. Set the experiment duration as appropriate. Click Finish and wait for nodes to start.
+## Host
 
-# Machine Startup
+1. ssh into the "Host" machine and navigate to the "/local" directory. AIFM should be present.
+2. Run `ifconfig` and copy the eno49 network card IP address.
+3. Modify "./AIFM/aifm/configs/server.config" (addr line) to reflect the ip from step (2).
+4. Modify "./AIFM/aifm/configs/server.config" (netmask line) to "255.255.248.0".
+5. Run `route -n` and copy the gateway for the 0.0.0.0 destination.
+6. Modify "./AIFM/aifm/configs/server.config" (gateway line) to the gateway ip from step (5).
+7. Run `sudo ./AIFM/aifm/build_all.sh`
 
-### Server
+## Client
 
-1. SSH into the "Server" machine.
-2. Download appropriate RDMA drivers from the link below. Use the most recent driver version and specify all other options as appropriate. The tutorial uses the .iso downloadable file:
-* [RDMA DRIVERS](https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed/)
-3. Mount the .iso on the machine to an appropriate location:
+1. Repeat steps 1 - 7 on the client machine (running all commands on the client again), but modifying "./AIFM/aifm/configs/client.config" instead.
+2. Generate a new ssh key with `ssh-keygen -t ed25519 -C "client_node"`
+3. Run `cat ~/.ssh/id_ed25519.pub` and copy the output.
+4. Include this public key on the *HOST* machine under "~/.ssh/authorized_keys" file. This can be done via `sudo nano ~/.ssh/authorized_keys`.
+5. Modify `./AIFM/aifm/configs/ssh` to use the new private key and SSH to the correct user. An example of a correct ssh file is as follows:
 
-    `sudo mkdir -p /mnt/iso/ISwap`
-    
-    `sudo mount -o loop [PATH_TO_ISO] /mnt/iso/ISwap`
+```
+MEM_SERVER_SSH_IP=128.110.218.182 # IP of host machine
+MEM_SERVER_SSH_USER=paldea # username of client
 
-4. Install the drivers and confirm any prompts:
+function ssh_execute {
+    ssh $MEM_SERVER_SSH_USER@$MEM_SERVER_SSH_IP -o "IdentitiesOnly=yes" -i "~/.ssh/id_ed25519" $1
+}
 
-    `sudo /mnt/iso/ISwap/mlnxofedinstall`
+function ssh_execute_tty {
+    ssh $MEM_SERVER_SSH_USER@$MEM_SERVER_SSH_IP -o "IdentitiesOnly=yes" -i "~/.ssh/id_ed25519" -t $1
+}
+```
 
-5. Run any commands listed by the previous command to ensure successful driver installation and start. **NOTE: the machine may disconnect for a period of time (since network drivers are restarting) -- if this is longer than 2-ish minutes, perform a power-cycle and reconnect to the machine.**
+6. Modify `./AIFM/aifm/shared.sh` to reflect the host machine's IP on line 6.
+7. Run `sudo ./AIFM/build_all.sh` if not already done in previous steps.
+8. Run `cd ./AIFM/aifm && ./test.sh`. All tests should pass; this may take a few minutes.
 
-6. Clone the Infiniswap project into the user home directory:
+## DynamicSwap
 
-    `git clone https://github.com/SymbioticLab/Infiniswap.git`
-
-7. Run `ifconfig` and take a note of the DHCP assigned IP address of the **Mellanox NIC Device.** Along with the **MASK** of the device.
-
-8. Modify the `Infiniswap/setup/ib_setup.sh` script to reflect the mask from step 7. If my mask were (for example) `255.255.248.0` I would modify the CIDR net mask to `/21` on the fourth line of the file; e.g.:
-
-    `sudo ifconfig ib0 $1/21`
-
-9. Run the `ib_setup.sh` script with the IP from step 7 as the only argument. This should complete quickly and without interruption. If the device loses connection, your step 7 or 8 were done incorrectly:
-
-    `cd setup`
-
-    `sudo ./ib_setup.sh [IP_ADDR]`
-
-10. Run the install script:
-
-    `sudo ./install.sh daemon`
-
-11. Run the daemon with the IP from step 7 and a high PORT number (e.g. 8000) to verify that the sever is fully functional; the command-line should print a listening indicator:
-
-    `cd infiniswap_daemon`
-
-    `./infiniswap_daemon [IP_ADDR] [PORT]`
-
-### Client
-
-1. Copy steps 1 - 9 from the server start-up listed above but with the "Client" node.
-
-3. Change the portal list in `setup` to reflect the IP and port on which the server is listening:
-
-    `cd setup`
-
-    `nano portal.list`
-
-        [IP_ADDR]:[PORT] # of server
-
-2. Run the install script:
-
-    `sudo ./install.sh bd`
-
-3. Find any existing swap partitions:
-
-    `sudo swapon -s`
-
-5. Remove all swap partitions from step 3 with:
-
-    `sudo swapoff [swap_partitions]`
-
-6. Run block device setup:
-
-    `sudo ./infiniswap_bd_setup.sh`
-
-    *If there is an error, try:*
-
-    ```
-    cd infiniswap_bd
-    make clean
-    cd ../setup
-    ./get_module.symvers.sh [mlnx_ofed_version]
-    ```
-
-    And restart from step 2.
-
-7. The device is now ready for use in remote memory transactions -- note that applications must run in a container (e.g. LXC or Docker) to page memory out.
-
-## Appendix A
-
-Create your own profile by navigating to "My Profiles" and clicking on the profile creation link.
-
-Ensure that you add two nodes, with unique names, which are connected via a mutual switch (you can drag from one node to the other).
-
-Both nodes should be set to the same hardware (e.g. Xl170) and the same Ubuntu Linux version (e.g. 20.04). Both nodes can either operate on a bare-metal node or XenVM if you wish.
-
+1. Clone the DynamicSwap repository in the local folder: `cd /local && git clone https://github.com/paulxro/cse582_dynamicswap.git`
+2. Enter new folder: `cd cse582_dynamicswap`
+3. Copy ALL files in "./aifm_changes" to either "/local/AIFM/aifm/inc" or "/local/AIFM/aifm/src" or "/local/AIFM/aifm" based on file type. All cpp files should be placed in src, all hpp files should be placed in inc, and the Makefile should be placed in "aifm".
+7. Run `rm /local/AIFM/aifm/bin/*`.
+4. Run `make` and the DynamicSwap source should be built. If error occurs, you may need to manually create an obj folder under unit_tests and cse582_dynamicswap: `mkdir /local/cse582_dynamicswap/obj && mkdir /local/cse582_dynamicswap/unit_tests/obj`. If permission errors occur, make sure the current user has ownership privileges over the directory: `sudo chown -R $UNAME: /local`.
+5. It is OK for warnings to be displayed, so long as compilation is successful.
+8. Run `cd /local/AIFM/aifm`.
+9. Run `./test.sh`. The first tcp test should pass. You may compile more tests by modifying the makefile found under "/local/cse582_dynamicswap/" on line 36 by appending the names of tests found under "/local/cse582_dynamicswap/unittests/src".

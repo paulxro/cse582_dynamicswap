@@ -68,7 +68,7 @@ FarMemManager::FarMemManager(uint64_t cache_size, uint64_t far_mem_size,
   }
   memset(evac_notifiers_, 0, sizeof(evac_notifiers_));
 
-  init_dynamic_pager();
+  init_dynamic_pager(cache_size);
 
   for (uint8_t ds_id =
            std::numeric_limits<decltype(available_ds_ids_)::value_type>::min();
