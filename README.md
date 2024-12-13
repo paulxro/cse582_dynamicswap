@@ -53,7 +53,7 @@ function ssh_execute_tty {
 2. Enter new folder: `cd cse582_dynamicswap`
 3. Copy ALL files in "./aifm_changes" to either "/local/AIFM/aifm/inc" or "/local/AIFM/aifm/src" or "/local/AIFM/aifm" based on file type. All cpp files should be placed in src, all hpp files should be placed in inc, and the Makefile should be placed in "aifm".
 7. Run `rm /local/AIFM/aifm/bin/*`.
-4. Run `make` and the DynamicSwap source should be built. If error occurs, you may need to manually create an obj folder under unit_tests and cse582_dynamicswap: `mkdir /local/cse582_dynamicswap/obj && mkdir /local/cse582_dynamicswap/unit_tests/obj`. If permission errors occur, make sure the current user has ownership privileges over the directory: `sudo chown -R $UNAME: /local`.
+4. Run `make` and the DynamicSwap source should be built. If error occurs, you may need to manually create an obj folder under unit_tests and cse582_dynamicswap: `mkdir /local/cse582_dynamicswap/obj && mkdir /local/cse582_dynamicswap/unit_tests/obj`. If permission errors occur, make sure the current user has ownership privileges over the directory: `sudo chown -R $USER: /local`.
 5. It is OK for warnings to be displayed, so long as compilation is successful.
 8. Run `cd /local/AIFM/aifm`.
 9. Run `./test.sh`. The first tcp test should pass. You may compile more tests by modifying the makefile found under "/local/cse582_dynamicswap/" on line 36 by appending the names of tests found under "/local/cse582_dynamicswap/unittests/src".
